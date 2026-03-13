@@ -1,0 +1,10 @@
+{
+    "cSpell.words": [
+        "creationflags",
+        "konsole",
+        "lflags",
+        "tcgetattr",
+        "TCSADRAIN",
+        "tcsetattr"
+    ]
+}
