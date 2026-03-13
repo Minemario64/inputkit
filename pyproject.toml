@@ -1,7 +1,12 @@
 [project]
 name = "inputkit"
 version = "0.1.0"
-description = "Add your description here"
+description = "A cross-platform package for getting and handling raw input"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "tester",
+]
+
+[tool.uv.sources]
+tester = { git = "https://github.com/Minemario64/Testing-Suite.git" }
