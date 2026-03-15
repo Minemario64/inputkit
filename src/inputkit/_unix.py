@@ -1,5 +1,5 @@
 import sys, termios, tty, select
-from typing import Callable
+from typing import Callable, overload
 from enum import Enum
 
 class Key(Enum):
@@ -129,7 +129,13 @@ def _getKey() -> bytes:
         else:
             _read_into_buffer(None)
 
-def handleInput(func: Callable[[Key | str], bool] | None = None,/, hideCursor: bool = True):
+@overload
+def handleInput(func: Callable[[Key | str], bool]) -> None: ...
+
+@overload
+def handleInput(func: None = None,*, hideCursor: bool = True) -> Callable: ...
+
+def handleInput(func: Callable[[Key | str], bool] | None = None,*, hideCursor: bool = True) -> Callable | None:
     def wrapper(func: Callable[[Key | str], bool]):
         if hideCursor: print("\x1b[?25l", end='', flush=True)
         fd = sys.__stdin__.fileno() # type: ignore
@@ -164,7 +170,7 @@ def handleInput(func: Callable[[Key | str], bool] | None = None,/, hideCursor: b
 
 if __name__ == "__main__":
     if supportsRawInput():
-        @handleInput
+        @handleInput()
         def inputHandler(key: Key | str) -> bool:
             match key:
                 case Key.CTRL_C: # Ctrl+C

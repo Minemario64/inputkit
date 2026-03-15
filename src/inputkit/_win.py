@@ -1,6 +1,6 @@
 import msvcrt
 from enum import Enum
-from typing import Callable
+from typing import Callable, overload
 
 class Key(Enum):
     UP = "H"
@@ -57,7 +57,13 @@ def _getkey() -> str | Key:
     except ValueError:
         return ch
 
-def handleInput(callback: Callable[[str | Key], bool] | None = None,/, hideCursor: bool = True):
+@overload
+def handleInput(callback: Callable[[Key | str], bool]) -> None: ...
+
+@overload
+def handleInput(callback: None = None, *, hideCursor: bool = True) -> Callable: ...
+
+def handleInput(callback: Callable[[str | Key], bool] | None = None,*, hideCursor: bool = True):
     def wrapper(callback: Callable[[str | Key], bool]):
         going: bool = True
         if hideCursor: print("\x1b[?25l", end='', flush=True)
