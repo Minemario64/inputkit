@@ -129,35 +129,42 @@ def _getKey() -> bytes:
         else:
             _read_into_buffer(None)
 
-def handleInput(func: Callable[[Key | str], bool], hideCursor: bool = True):
-    if hideCursor: print("\x1b[?25l", end='', flush=True)
-    fd = sys.__stdin__.fileno() # type: ignore
-    old_settings = termios.tcgetattr(fd)
+def handleInput(func: Callable[[Key | str], bool] | None = None,/, hideCursor: bool = True):
+    def wrapper(func: Callable[[Key | str], bool]):
+        if hideCursor: print("\x1b[?25l", end='', flush=True)
+        fd = sys.__stdin__.fileno() # type: ignore
+        old_settings = termios.tcgetattr(fd)
 
-    try:
-        tty.setraw(fd)        # raw mode (no line buffering)
-        disableEcho()
+        try:
+            tty.setraw(fd)
+            disableEcho()
 
-        going: bool = True
+            going: bool = True
 
-        while going:
-            keyBytes: bytes = _getKey()
-            try:
-                key = Key(keyBytes)
+            while going:
+                keyBytes: bytes = _getKey()
+                try:
+                    key = Key(keyBytes)
 
-            except ValueError:
-                key =  str(keyBytes, 'utf8')
+                except ValueError:
+                    key =  str(keyBytes, 'utf8')
 
-            going = func(key)
+                going = func(key)
 
-    finally:
-        enableEcho()
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        finally:
+            enableEcho()
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-    if hideCursor: print("\x1b[?25h", end='', flush=True)
+        if hideCursor: print("\x1b[?25h", end='', flush=True)
+
+    if func is None:
+        return wrapper
+
+    wrapper(func)
 
 if __name__ == "__main__":
     if supportsRawInput():
+        @handleInput
         def inputHandler(key: Key | str) -> bool:
             match key:
                 case Key.CTRL_C: # Ctrl+C
@@ -171,5 +178,3 @@ if __name__ == "__main__":
                         print(f"{repr(key)}", end="\r\n")
 
             return True
-
-        handleInput(inputHandler)

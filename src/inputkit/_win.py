@@ -57,10 +57,32 @@ def _getkey() -> str | Key:
     except ValueError:
         return ch
 
-def handleInput(callback: Callable[[str | Key], bool], hideCursor: bool = True) -> None:
-    going: bool = True
-    if hideCursor: print("\x1b[?25l", end='', flush=True)
-    while going:
-        going = callback(_getkey())
+def handleInput(callback: Callable[[str | Key], bool] | None = None,/, hideCursor: bool = True):
+    def wrapper(callback: Callable[[str | Key], bool]):
+        going: bool = True
+        if hideCursor: print("\x1b[?25l", end='', flush=True)
+        while going:
+            going = callback(_getkey())
 
-    if hideCursor: print("\x1b[?25h", end='', flush=True)
+        if hideCursor: print("\x1b[?25h", end='', flush=True)
+
+    if callback is None:
+        return wrapper
+
+    wrapper(callback)
+
+if __name__ == "__main__":
+    @handleInput
+    def inputHandler(key: Key | str) -> bool:
+        match key:
+            case Key.CTRL_C: # Ctrl+C
+                return False # Would Stop handling input, then quit
+
+            case _:
+                if isinstance(key, Key):
+                    print(key.name)
+
+                else:
+                    print(f"{repr(key)}")
+
+        return True
