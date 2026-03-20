@@ -167,20 +167,3 @@ def handleInput(func: Callable[[Key | str], bool] | None = None,*, hideCursor: b
         return wrapper
 
     wrapper(func)
-
-if __name__ == "__main__":
-    if supportsRawInput():
-        @handleInput()
-        def inputHandler(key: Key | str) -> bool:
-            match key:
-                case Key.CTRL_C: # Ctrl+C
-                    return False # Would Stop handling input, then quit
-
-                case _:
-                    if isinstance(key, Key):
-                        print(key.name, end='\r\n')
-
-                    else:
-                        print(f"{repr(key)}", end="\r\n")
-
-            return True

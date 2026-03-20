@@ -51,6 +51,9 @@ def _getkey() -> str | Key:
         except ValueError:
             return f"{ch}{ID}"
 
+    if ch.isalpha():
+        return ch
+
     try:
         return Key(ch)
 
@@ -76,19 +79,3 @@ def handleInput(callback: Callable[[str | Key], bool] | None = None,*, hideCurso
         return wrapper
 
     wrapper(callback)
-
-if __name__ == "__main__":
-    @handleInput
-    def inputHandler(key: Key | str) -> bool:
-        match key:
-            case Key.CTRL_C: # Ctrl+C
-                return False # Would Stop handling input, then quit
-
-            case _:
-                if isinstance(key, Key):
-                    print(key.name)
-
-                else:
-                    print(f"{repr(key)}")
-
-        return True

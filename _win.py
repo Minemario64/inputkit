@@ -51,6 +51,9 @@ def _getkey() -> str | Key:
         except ValueError:
             return f"{ch}{ID}"
 
+    if ch.isalpha():
+        return ch
+
     try:
         return Key(ch)
 
